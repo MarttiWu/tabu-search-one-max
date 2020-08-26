@@ -104,33 +104,51 @@ void TS::update_tabu_list(){
 }
 
 void TS::run(){
-    init_point();
-    int it=0;
-    int max=Sum(bitstr);
-    while (it<iter&&max<bits){
-        int *candidate = select_neighbor(bitstr);
-        int sum=Sum(candidate);
-        if (sum>max){
-            max=sum;
-            bitstr = candidate;
-            update_tabu_list();
+    Initialization();
+    best_value = value = FitnessFunction(bitstr);
+    best_bitstr = bitstr;
+    record_bitstr[0] = best_bitstr;
+    record_value[0] = best_value;
+    int it=1;
+    //stopping condition
+    while (it<iter&&best_value<bits){
+        vector<int> neighbor = select_neighbor(bitstr);
+        int neighbor_value = FitnessFunction(neighbor);
+        //accept better solution
+        if (neighbor_value>value){
+            bitstr = neighbor;
+            value = neighbor_value;
         }
-        else {
-            cout<<"pardon hurray!"<<endl;
-            candidate = pardon();
-            max = Sum(candidate);
-            bitstr = candidate;
-            update_tabu_list();
+        else{
+            //accept worse solution for probability of Pa
+            if ( ((double)rand()/RAND_MAX) < Pa(value,neighbor_value) ){
+                bitstr = neighbor;
+                value = neighbor_value;
+            }
+            //doesn't accept for probability (1-Pa)
         }
+        
+        value = FitnessFunction(bitstr);
+        
+        if (value>best_value){
+            best_value = value;
+            best_bitstr = bitstr;
+        }
+        
+        record_bitstr[it] = best_bitstr;
+        record_value[it] = best_value;
+        
+        anneal();
         it++;
     }
-    for (int i=0;i<bits;i++)
-        max_bitstr[i]=bitstr[i];
-    Max = max;
-    cout<<"max: "<<max<<endl;
+    
+    for (int i=it;i<record_value.size();i++){
+        record_bitstr[i] = best_bitstr;
+        record_value[i] = best_value;
+    }
 }
 
-void TS::init_point(){
+void TS::Initialization(){
     for (int i=bits-1;i>=0;i--){
         bitstr[i] = rand()%2;
     }
