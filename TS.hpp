@@ -16,7 +16,6 @@
 #include <ctime>
 #include <vector>
 #include <algorithm>
-#define TABU_LENGTH 30
 
 using namespace std;
 
@@ -26,23 +25,29 @@ public:
     TS(int b,int iterations);
     void run();
     
-    void init_point();
-    int Sum(int *str);
-    int get_max(){return Max;}
+    void Initialization();
+    int FitnessFunction(vector<int> str);
     void form_neighbor1();
     void form_neighbor2();
-    int *select_neighbor(int *str);
-    int *pardon();
+    vector<int> select_neighbor(vector<int> str);
+    vector<int> pardon();
     void update_tabu_list();
+    vector<int> get_record_bitstr(int it){return record_bitstr[it];}
+    int get_record_value(int it){return record_value[it];}
 private:
-    int *bitstr;
-    int iter;
     int bits;
-    int Max;
-    int *max_bitstr;
-    int *tabu_list;
+    int iter;
+    int tabu_length;
+    vector<int> tabu_list;
     int tabu_index;
-    vector<int *> neighbor;
+    vector<vector<int> > neighbor;
+    
+    vector<int> bitstr;
+    int value;
+    vector<int> best_bitstr;
+    int best_value;
+    vector<vector<int> > record_bitstr;
+    vector<int> record_value;
 };
 
 #endif /* TS_hpp */
